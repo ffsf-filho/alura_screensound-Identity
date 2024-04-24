@@ -22,7 +22,7 @@ public static class ArtistasExtensions
             }
             var listaDeArtistaResponse = EntityListToResponseList(listaDeArtistas);
             return Results.Ok(listaDeArtistaResponse);
-        });
+        }).RequireAuthorization();
 
         groupBuilder.MapGet("{nome}", ([FromServices] DAL<Artista> dal, string nome) =>
         {
