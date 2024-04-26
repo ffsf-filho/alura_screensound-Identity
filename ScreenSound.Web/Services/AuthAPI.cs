@@ -1,18 +1,46 @@
-﻿using ScreenSound.Web.Response;
+﻿using Microsoft.AspNetCore.Components.Authorization;
+using ScreenSound.Web.Response;
 using System.Net.Http.Json;
+using System.Security.Claims;
 
 namespace ScreenSound.Web.Services;
 
-public class AuthAPI(IHttpClientFactory factory)
+public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient = factory.CreateClient("API");
 
+    public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+    {
+        ClaimsPrincipal pessoa = new();
+        
+        var response = await _httpClient.GetAsync("auth/manage/info");
+
+        if (response.IsSuccessStatusCode)
+        {
+            InfoPessoaResponse? info = await response.Content.ReadFromJsonAsync<InfoPessoaResponse>();
+
+            Claim[] dados = [
+                 new Claim(ClaimTypes.Name, info.Email!),
+                 new Claim(ClaimTypes.Email, info.Email!)
+            ];
+
+            ClaimsIdentity identity = new(dados, "Cookie");
+            pessoa = new ClaimsPrincipal(identity);
+        }
+
+        return new AuthenticationState(pessoa);
+    }
+
     public async Task<AuthResponse> LoginAsync(string? email, string? senha)
     {
-        var resposta = await _httpClient.PostAsJsonAsync("auth/login?useCookies=true", new {email,password = senha});
+        var response = await _httpClient.PostAsJsonAsync("auth/login?useCookies=true", new {email,password = senha});
 
-        return resposta.IsSuccessStatusCode ? new AuthResponse { Sucesso = true } : new AuthResponse { Sucesso = false,
-            Erros = ["Login/senha inválidos"] 
-        };
+        if (response.IsSuccessStatusCode)
+        {
+            NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+            return new AuthResponse { Sucesso = true };
+        }
+
+        return new AuthResponse { Sucesso = false, Erros = ["Login/senha inválidos"]};
     }
 }
