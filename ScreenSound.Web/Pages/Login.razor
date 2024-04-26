@@ -1,6 +1,7 @@
 ﻿@page "/Login"
 
 @inject AuthAPI authAPI
+@inject NavigationManager navigationManager
 
 <MudPaper Class="px-8 pt-2 pb-4 mx-16 my-8" Justify="Justify.Center">
     <AuthorizeView>
@@ -37,5 +38,6 @@
     private async Task FazerLogin()
     {
         await authAPI.LoginAsync(email, senha);
+        navigationManager.NavigateTo("/");
     }
 }

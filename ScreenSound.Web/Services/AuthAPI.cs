@@ -8,6 +8,7 @@ namespace ScreenSound.Web.Services;
 public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 {
     private readonly HttpClient _httpClient = factory.CreateClient("API");
+    private bool autenticado = false;
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
     {
@@ -26,6 +27,7 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
 
             ClaimsIdentity identity = new(dados, "Cookie");
             pessoa = new ClaimsPrincipal(identity);
+            autenticado = true;
         }
 
         return new AuthenticationState(pessoa);
@@ -42,5 +44,17 @@ public class AuthAPI(IHttpClientFactory factory) : AuthenticationStateProvider
         }
 
         return new AuthResponse { Sucesso = false, Erros = ["Login/senha inválidos"]};
+    }
+
+    public async Task LogoutAsync()
+    {
+        await _httpClient.PostAsync("auth/logout", null);
+        NotifyAuthenticationStateChanged(GetAuthenticationStateAsync());
+    }
+
+    public async Task<bool> VerificaAutenticado()
+    {
+        await GetAuthenticationStateAsync();
+        return autenticado;
     }
 }
