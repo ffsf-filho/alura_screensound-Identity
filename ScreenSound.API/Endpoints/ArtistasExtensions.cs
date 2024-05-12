@@ -136,24 +136,24 @@ public static class ArtistasExtensions
 
             if (avaliacao is null)
             {
-                return Results.Ok(new AvaliacaoArtistaResponse(id, 0));
+                return Results.Ok(new AvaliacaoDoArtistaResponse(id, 0));
             }
             else
             {
-                return Results.Ok(new AvaliacaoArtistaResponse(id, avaliacao.Nota));
+                return Results.Ok(new AvaliacaoDoArtistaResponse(id, avaliacao.Nota));
             }
         });
         #endregion
     }
 
-    private static ICollection<ArtistaResponse> EntityListToResponseList(IEnumerable<Artista> listaDeArtistas)
+    private static ICollection<ArtistaDoResponse> EntityListToResponseList(IEnumerable<Artista> listaDeArtistas)
     {
         return listaDeArtistas.Select(a => EntityToResponse(a)).ToList();
     }
 
-    private static ArtistaResponse EntityToResponse(Artista artista)
+    private static ArtistaDoResponse EntityToResponse(Artista artista)
     {
-        return new ArtistaResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil)
+        return new ArtistaDoResponse(artista.Id, artista.Nome, artista.Bio, artista.FotoPerfil)
         {
             Classificacao = artista
                             .Avaliacoes
